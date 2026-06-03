@@ -1,0 +1,112 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Modality {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  description String?
+  icon      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  manufacturers Manufacturer[]
+  roomTemplates  RoomTemplate[]
+  standards      Standard[]
+  analyses       AnalysisResult[]
+}
+
+model Manufacturer {
+  id         Int      @id @default(autoincrement())
+  name       String
+  country    String?
+  modalityId Int
+  modality   Modality @relation(fields: [modalityId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  machines Machine[]
+
+  @@unique([name, modalityId])
+}
+
+model Machine {
+  id             Int      @id @default(autoincrement())
+  model          String
+  type           String?
+  kvp            Int?
+  ma             Int?
+  workload       Int?
+  beamAngle      Float?   // beam angle in degrees
+  sourceFactor   Float?   // Source Factor (SF)
+  safetyIndex    Float?   // Safety Index (SI)
+  leakageValue   Float?   // leakage radiation value
+  sourceIntensity Float?
+  manufacturerId Int
+  manufacturer   Manufacturer @relation(fields: [manufacturerId], references: [id])
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+
+  @@unique([model, manufacturerId])
+}
+
+model RoomTemplate {
+  id          Int      @id @default(autoincrement())
+  name        String
+  length      Float
+  width       Float
+  height      Float
+  description String?
+  modalityId  Int
+  modality    Modality @relation(fields: [modalityId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Standard {
+  id        Int      @id @default(autoincrement())
+  key       String
+  region    String
+  limit     Float
+  description String?
+  modalityId Int
+  modality  Modality @relation(fields: [modalityId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AnalysisResult {
+  id          Int      @id @default(autoincrement())
+  type        String   // shielding | leakage | compliance
+  label       String?
+  inputData   String   // JSON snapshot of input
+  resultData  String   // JSON of computed results
+  status      String   // SAFE, WARNING, FAIL
+  modalityId  Int?
+  modality    Modality? @relation(fields: [modalityId], references: [id])
+  createdAt   DateTime @default(now())
+
+  reports Report[]
+}
+
+model Report {
+  id              Int      @id @default(autoincrement())
+  title           String
+  summary         String?
+  status          String   // SAFE, WARNING, FAIL
+  reportData      String?  // JSON of full report data
+  recommendations String?  // JSON array of recommendation strings
+  errorLogs       String?  // JSON array of error log entries
+  modalityName    String?
+  roomType        String?
+  facilityType    String?
+  machineModel    String?
+  analysisResultId Int?
+  analysisResult  AnalysisResult? @relation(fields: [analysisResultId], references: [id])
+  createdAt       DateTime @default(now())
+}

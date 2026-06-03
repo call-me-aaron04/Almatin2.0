@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SHIELDPLAN — Radiation Shielding Design</title>
+  <meta name="description" content="Advanced radiation shielding analysis and compliance platform" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="stylesheet" href="/src/styles/main.css" />
+</head>
+<body>
+  <canvas id="particle-canvas"></canvas>
+
+  <!-- App Shell -->
+  <div id="app">
+    <!-- Sidebar -->
+    <nav id="sidebar" class="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-icon">🛡️</span>
+        <span class="brand-text">SHIELDPLAN</span>
+      </div>
+      <div class="sidebar-nav">
+        <a class="nav-link active" data-page="dashboard" href="#dashboard">
+          <span class="nav-icon">📊</span>
+          <span class="nav-label">Dashboard</span>
+        </a>
+        <a class="nav-link" data-page="workflow" href="#workflow">
+          <span class="nav-icon">⚡</span>
+          <span class="nav-label">Workflow</span>
+        </a>
+        <a class="nav-link" data-page="reports" href="#reports">
+          <span class="nav-icon">📋</span>
+          <span class="nav-label">Reports</span>
+        </a>
+        <a class="nav-link" data-page="settings" href="#settings">
+          <span class="nav-icon">⚙️</span>
+          <span class="nav-label">Settings</span>
+        </a>
+      </div>
+      <div class="sidebar-footer">
+        <div class="theme-toggle" id="theme-toggle" title="Toggle theme">
+          <span id="theme-icon">🌙</span>
+        </div>
+        <div class="sidebar-version">v1.0</div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main id="main-content">
+      <div id="page-dashboard" class="page active">Loading dashboard...</div>
+      <div id="page-workflow" class="page">Loading workflow...</div>
+      <div id="page-reports" class="page">Loading reports...</div>
+      <div id="page-settings" class="page">Loading settings...</div>
+    </main>
+  </div>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Modal Overlay -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal-content" id="modal-content"></div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
