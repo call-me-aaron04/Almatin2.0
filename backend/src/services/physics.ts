@@ -640,6 +640,6 @@ export function calculateCompliance(input: ComplianceInput): ComplianceResult {
     complianceScore: Math.round(complianceScore * 100) / 100,
     riskLevel: riskLevels[worstStatus],
     perStandard,
-    recommendations: recommendations.filter(r => r.priority === 'HIGH').map(r => r.message),
+    recommendations,
   };
 }

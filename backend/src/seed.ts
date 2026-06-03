@@ -5,23 +5,29 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Seeding database...');
 
-  // ----- Modalities (13 total) -----
+  // ----- Modalities (13 total) — using upsert so re-running seed is safe -----
+  async function upsertModality(name: string, description: string, icon: string) {
+    return prisma.modality.upsert({
+      where: { name },
+      update: { description, icon },
+      create: { name, description, icon },
+    });
+  }
+
   const modalities = await Promise.all([
-    // Existing 8 modalities
-    prisma.modality.create({ data: { name: 'XR', description: 'X-Ray Radiography', icon: '🔦' } }),
-    prisma.modality.create({ data: { name: 'Cath Lab', description: 'Cardiac Catheterization Lab', icon: '❤️' } }),
-    prisma.modality.create({ data: { name: 'CT', description: 'Computed Tomography', icon: '🔄' } }),
-    prisma.modality.create({ data: { name: 'PET-CT', description: 'Positron Emission Tomography - CT', icon: '🔬' } }),
-    prisma.modality.create({ data: { name: 'Cyclotron', description: 'Cyclotron Facility', icon: '⚛️' } }),
-    prisma.modality.create({ data: { name: 'LINAC', description: 'Linear Accelerator', icon: '🎯' } }),
-    prisma.modality.create({ data: { name: 'Gamma Room', description: 'Gamma Irradiation Room', icon: '☢️' } }),
-    prisma.modality.create({ data: { name: 'Neutron Facility', description: 'Neutron Radiation Facility', icon: '🧪' } }),
-    // New modalities
-    prisma.modality.create({ data: { name: 'Mammography', description: 'Mammography / Breast Imaging', icon: '🎗️' } }),
-    prisma.modality.create({ data: { name: 'Fluoroscopy', description: 'Fluoroscopy / R&F Radiography', icon: '📹' } }),
-    prisma.modality.create({ data: { name: 'Nuclear Medicine', description: 'Nuclear Medicine / SPECT Imaging', icon: '💊' } }),
-    prisma.modality.create({ data: { name: 'HDR Brachytherapy', description: 'High-Dose-Rate Brachytherapy', icon: '🎯' } }),
-    prisma.modality.create({ data: { name: 'Orthovoltage', description: 'Orthovoltage / Superficial Therapy', icon: '⚡' } }),
+    upsertModality('XR', 'X-Ray Radiography', '🔦'),
+    upsertModality('Cath Lab', 'Cardiac Catheterization Lab', '❤️'),
+    upsertModality('CT', 'Computed Tomography', '🔄'),
+    upsertModality('PET-CT', 'Positron Emission Tomography - CT', '🔬'),
+    upsertModality('Cyclotron', 'Cyclotron Facility', '⚛️'),
+    upsertModality('LINAC', 'Linear Accelerator', '🎯'),
+    upsertModality('Gamma Room', 'Gamma Irradiation Room', '☢️'),
+    upsertModality('Neutron Facility', 'Neutron Radiation Facility', '🧪'),
+    upsertModality('Mammography', 'Mammography / Breast Imaging', '🎗️'),
+    upsertModality('Fluoroscopy', 'Fluoroscopy / R&F Radiography', '📹'),
+    upsertModality('Nuclear Medicine', 'Nuclear Medicine / SPECT Imaging', '💊'),
+    upsertModality('HDR Brachytherapy', 'High-Dose-Rate Brachytherapy', '🎯'),
+    upsertModality('Orthovoltage', 'Orthovoltage / Superficial Therapy', '⚡'),
   ]);
 
   const modMap = Object.fromEntries(modalities.map((m) => [m.name, m.id]));
@@ -406,27 +412,34 @@ async function main() {
   ];
 
   for (const mf of manufacturerData) {
-    const manufacturer = await prisma.manufacturer.create({
-      data: {
+    const manufacturer = await prisma.manufacturer.upsert({
+      where: { name_modalityId: { name: mf.name, modalityId: modMap[mf.modality] } },
+      update: { country: mf.country },
+      create: {
         name: mf.name,
         country: mf.country,
         modalityId: modMap[mf.modality],
-        machines: {
-          create: mf.machines.map((m) => ({
-            model: m.model,
-            type: m.type,
-            kvp: m.kvp ?? null,
-            ma: m.ma ?? null,
-            workload: m.workload ?? null,
-            beamAngle: m.beamAngle ?? null,
-            sourceFactor: m.sourceFactor ?? null,
-            safetyIndex: m.safetyIndex ?? null,
-            leakageValue: m.leakageValue ?? null,
-          })),
-        },
       },
-      include: { machines: true },
     });
+
+    // Replace machines: delete old ones, then create fresh
+    await prisma.machine.deleteMany({ where: { manufacturerId: manufacturer.id } });
+    for (const m of mf.machines) {
+      await prisma.machine.create({
+        data: {
+          model: m.model,
+          type: m.type,
+          kvp: m.kvp ?? null,
+          ma: m.ma ?? null,
+          workload: m.workload ?? null,
+          beamAngle: m.beamAngle ?? null,
+          sourceFactor: m.sourceFactor ?? null,
+          safetyIndex: m.safetyIndex ?? null,
+          leakageValue: m.leakageValue ?? null,
+          manufacturerId: manufacturer.id,
+        },
+      });
+    }
     console.log(`  ✅ ${mf.modality}: ${manufacturer.name} (${mf.machines.length} machines)`);
   }
 

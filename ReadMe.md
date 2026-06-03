@@ -25,7 +25,7 @@ radition_simulation/
     └── package.json
 ```
 
-## Quick Start
+## Quick Start (Local Development)
 
 ### Prerequisites
 
@@ -68,6 +68,74 @@ App opens at **http://localhost:5173**
    - Shielding analysis (dose rates, attenuation, wall-by-wall report)
    - Leakage analysis (barrier leakage rates)
    - Compliance check (against NCRP, IAEA, IEC standards)
+
+---
+
+## 🚀 Deploy to Render (Free Tier)
+
+Show your sir the app running live with this step-by-step guide.
+
+### Prerequisites
+
+- A [GitHub](https://github.com) account
+- A [Render](https://render.com) account (sign up with GitHub — free, no credit card)
+- Your code pushed to a GitHub repository
+
+### Step 1: Push to GitHub
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+# Create a repo on GitHub, then:
+git remote add origin https://github.com/YOUR_USERNAME/shieldplan.git
+git push -u origin main
+```
+
+### Step 2: Deploy the Backend
+
+1. Go to [Render Dashboard](https://dashboard.render.com) → **New +** → **Web Service**
+2. Connect your GitHub repo
+3. Fill in:
+   | Field | Value |
+   |-------|-------|
+   | **Name** | `shieldplan-api` |
+   | **Root Directory** | `backend` |
+   | **Runtime** | `Node` |
+   | **Build Command** | `npm install && npm run build` |
+   | **Start Command** | `npm start` |
+   | **Plan** | **Free** |
+4. Click **Create Web Service**
+5. Wait 2–3 minutes for the build to complete
+6. Copy your backend URL (looks like `https://shieldplan-api.onrender.com`)
+
+### Step 3: Deploy the Frontend
+
+1. Go to **New +** → **Static Site**
+2. Connect the same GitHub repo
+3. Fill in:
+   | Field | Value |
+   |-------|-------|
+   | **Name** | `shieldplan-frontend` |
+   | **Root Directory** | `frontend` |
+   | **Build Command** | `npm install && npm run build` |
+   | **Publish Directory** | `./dist` |
+4. Add an environment variable:
+   - **Key:** `VITE_API_BASE_URL`
+   - **Value:** `https://shieldplan-api.onrender.com/api`
+   *(Use the backend URL from Step 2)*
+5. Click **Create Static Site**
+
+### Step 4: Visit Your App 🎉
+
+Your frontend URL will be something like:
+`https://shieldplan-frontend.onrender.com`
+
+Send that link to your sir!
+
+> **Note:** Render free tier spins down after 15 min of inactivity (cold start ~30s on first request). The SQLite database resets on each deploy since free tier storage is ephemeral. For persistent data, upgrade to a paid plan or switch to a hosted database.
+
+---
 
 ## API Endpoints
 

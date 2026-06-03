@@ -1,0 +1,44 @@
+# SHIELDPLAN — Render Deployment Configuration
+# https://render.com/docs/blueprint-spec
+#
+# Usage:
+# 1. Push this repo to GitHub
+# 2. Go to https://dashboard.render.com/blueprints
+# 3. Connect your GitHub repo — Render auto-detects this file
+#
+# Alternatively, set up manually (see ReadMe.md for instructions).
+
+services:
+
+  # ---- Backend API (Express + Prisma + SQLite) ----
+  - type: web
+    name: shieldplan-api
+    env: node
+    region: ohio
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      # Frontend must set VITE_API_BASE_URL to this service's URL
+      # e.g. https://shieldplan-api.onrender.com/api
+
+  # ---- Frontend (Vite Static Site) ----
+  - type: web
+    name: shieldplan-frontend
+    env: static
+    region: ohio
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: VITE_API_BASE_URL
+        value: https://shieldplan-api.onrender.com/api
+      # ⚠️ Replace with your actual backend URL after backend deploy
+      # Go to Render Dashboard → shieldplan-api → copy URL
+      # Then add it here and re-deploy the frontend
