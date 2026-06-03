@@ -102,7 +102,7 @@ git push -u origin main
    | **Name** | `shieldplan-api` |
    | **Root Directory** | `backend` |
    | **Runtime** | `Node` |
-   | **Build Command** | `npm install && npm run build` |
+   | **Build Command** | `npm install && npx prisma generate && npm run build` |
    | **Start Command** | `npm start` |
    | **Plan** | **Free** |
 4. Click **Create Web Service**
